@@ -48,7 +48,7 @@ async def taskme(id: str, user: User = Depends(current_user)):
             status_code=status.HTTP_404_NOT_FOUND, detail="Tarea no encontrada"
         )
 
-    return schema_task(tarea_buscada)
+    return tarea_buscada
 
 
 @router.put("/{id}", response_model=Task, status_code=status.HTTP_200_OK)
