@@ -26,11 +26,6 @@ router = APIRouter(
 
 @router.post("/created", response_model=User, status_code=status.HTTP_201_CREATED)
 async def registro(user: UserInDB):
-    if search_user("email", user.email) is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="El usuario ya está registrado",
-        )
     usuario = validator_user(user)
     user_insert_id = db_client.user_taskflow.insert_one(usuario).inserted_id
     user_db = schema_user(db_client.user_taskflow.find_one({"_id": user_insert_id}))
@@ -64,7 +59,7 @@ async def userme(user: User = Depends(current_user)):
 
 
 @router.get("/token/{username}", response_model=User, status_code=status.HTTP_200_OK)
-async def userme(username: str, user: User = Depends(current_user)):
+async def userme(username: str):
     found_user = search_user("username", username)
     if found_user is None:
         raise HTTPException(
