@@ -44,13 +44,31 @@ def search_task(field: str, key):
 
 
 def estadisticas(user: User):
-    tareas_cursor = db_client.tareas.find({"owner": str(user.id)})
-    dicio_task = schema_task_list(tareas_cursor)
+    tareas_cursor = db_client.tareas.find(
+        {"owner": str(user.id)}, {"status": 1, "priority": 1}
+    )
+
     estatis = {
-        "total_tasks": len(dicio_task),
-        "completed": sum(1 for t in dicio_task if t["status"] == "Completada"),
-        "pending": sum(1 for t in dicio_task if t["status"] == "Pendiente"),
-        "in_progress": sum(1 for t in dicio_task if t["status"] == "En progreso"),
-        "high_priority": sum(1 for t in dicio_task if t["priority"] == "Alta"),
+        "total_tasks": 0,
+        "completed": 0,
+        "pending": 0,
+        "in_progress": 0,
+        "high_priority": 0,
     }
+    mapa_de_categorias = {
+        "Completada": "completed",
+        "Pendiente": "pending",
+        "En progreso": "in_progress",
+        "Alta": "high_priority",
+    }
+    for t in tareas_cursor:
+        estatis["total_tasks"] += 1
+        cat_db = t.get("status")
+        pri_db = t.get("priority")
+        if cat_db in mapa_de_categorias:
+            clave = mapa_de_categorias[cat_db]
+            estatis[clave] += 1
+        if pri_db in mapa_de_categorias:
+            clave_pri = mapa_de_categorias[pri_db]
+            estatis[clave_pri] += 1
     return estatis
